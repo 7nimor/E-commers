@@ -40,3 +40,7 @@ class UserRegisterForm(forms.Form):
     full_name = forms.CharField(max_length=100, label='full name')
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+
+
+class UserRegisterVerifyForm(forms.Form):
+    code = forms.CharField()
