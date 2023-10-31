@@ -29,7 +29,7 @@ class UserRegisterView(View):
             }
             messages.success(request, 'we sent your OTP code', 'success')
             return redirect('accounts:user_verify')
-        return redirect('home:home')
+        return render(request, 'accounts/register.html', {'form': form})
 
 
 class UserVerifyCodeView(View):
