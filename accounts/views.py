@@ -45,15 +45,14 @@ class UserVerifyCodeView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            if cd['code'] == otp_code.code:
-                print('ok')
-                User.objects.create(
+            if cd['code'] == str(otp_code.code):
+                User.objects.create_user(
                     email=info['email'],
                     full_name=info['full_name'],
                     phone_number=info['phone'],
                     password=info['password']
                 )
-                otp_code.code.delete()
+                otp_code.delete()
                 messages.success(request, 'you registered.', 'success')
                 return redirect('home:home')
             else:
