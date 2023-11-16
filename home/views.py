@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from .models import Product
+from .tasks import all_bucket_object_task
 
 
 # Create your views here.
@@ -12,5 +13,11 @@ class HomeView(View):
 
 class ProductsDetailView(View):
     def get(self, request, slug):
-        product = get_object_or_404(Product,slug=slug)
+        product = get_object_or_404(Product, slug=slug)
         return render(request, 'home/details.html', {'product': product})
+
+
+class BucketView(View):
+    def get(self, request):
+        objects = all_bucket_object_task()
+        return render(request, 'home/bucket.html', {'objects': objects})
