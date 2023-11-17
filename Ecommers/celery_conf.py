@@ -2,13 +2,13 @@ from celery import Celery
 from datetime import timedelta
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'A.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Ecommers.settings')
 
 celery_app = Celery('Ecommers')
 celery_app.autodiscover_tasks()
 
 celery_app.conf.update(
-    broker_url='amqp://rabbitmq',
+    broker_url='amqp://',
     result_backend='rpc://',
     task_serializer='json',
     result_serializer='pickle',

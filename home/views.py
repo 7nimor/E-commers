@@ -1,7 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from .models import Product
-from .tasks import all_bucket_object_task
+from . import tasks
 
 
 # Create your views here.
@@ -19,5 +20,26 @@ class ProductsDetailView(View):
 
 class BucketView(View):
     def get(self, request):
-        objects = all_bucket_object_task()
+        objects = tasks.all_bucket_object_task()
         return render(request, 'home/bucket.html', {'objects': objects})
+
+
+class DeleteObjectBucket(View):
+    def get(self, request, key):
+        tasks.delete_bucket_object_task.delay(key)
+        messages.success(request, 'your image will be delete', 'info')
+        return redirect('home:bucket')
+
+
+class DownloadObjectBucket(View):
+    def get(self, request, key):
+        tasks.download_bucket_object_task.delay(key)
+        messages.success(request, 'your file will be downloaded', 'info')
+        return redirect('home:bucket')
+
+
+class UploadObjectBucket(View):
+    def get(self, request, key):
+        tasks.upload_bucket_object_task.delay(key)
+        messages.success(request, 'your file will be uploaded', 'info')
+        return redirect('home:bucket')
