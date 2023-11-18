@@ -1,9 +1,11 @@
 import random
 
 from django.contrib import messages
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import UserRegisterForm, UserRegisterVerifyForm
+from .forms import UserRegisterForm, UserRegisterVerifyForm, UserLoginForm
 from utils import send_otp_code
 from .models import OtpCode, User
 
@@ -59,3 +61,30 @@ class UserVerifyCodeView(View):
                 messages.error(request, 'your code is wrong', 'danger')
                 return redirect('accounts:user_verify')
         return redirect('home:home')
+
+
+class UserLogOutView(LoginRequiredMixin, View):
+    def get(self, request):
+        logout(request)
+        messages.success(request, 'you logged', 'success')
+        return redirect('home:home')
+
+
+class UserLoginView(View):
+    form_class = UserLoginForm
+
+    def get(self, request):
+        form = self.form_class
+        return render(request, 'accounts/login.html', {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            user = authenticate(request, phone_number=cd['phone'], password=cd['password'])
+            if user:
+                login(request, user)
+                messages.success(request, 'you are logged in', 'success')
+                return redirect('home:home')
+            messages.error(request, 'your phone or password is wrong', 'danger')
+        return render(request, 'accounts/login.html', {'form': form})

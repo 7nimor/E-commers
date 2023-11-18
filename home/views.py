@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from .models import Product
 from . import tasks
+from . import forms
 
 
 # Create your views here.
@@ -20,8 +21,9 @@ class ProductsDetailView(View):
 
 class BucketView(View):
     def get(self, request):
+        form = forms.UploadObjBucket()
         objects = tasks.all_bucket_object_task()
-        return render(request, 'home/bucket.html', {'objects': objects})
+        return render(request, 'home/bucket.html', {'objects': objects,'form':form})
 
 
 class DeleteObjectBucket(View):
@@ -39,7 +41,8 @@ class DownloadObjectBucket(View):
 
 
 class UploadObjectBucket(View):
-    def get(self, request, key):
-        tasks.upload_bucket_object_task.delay(key)
+
+    def get(self, request):
+        tasks.upload_bucket_object_task.delay(request.GET['upload_file'])
         messages.success(request, 'your file will be uploaded', 'info')
         return redirect('home:bucket')

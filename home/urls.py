@@ -7,7 +7,7 @@ bucket_urls = [
     path('', views.BucketView.as_view(), name='bucket'),
     path('delete_obj/<str:key>',views.DeleteObjectBucket.as_view(), name='delete_obj_bucket'),
     path('download_obj/<str:key>',views.DownloadObjectBucket.as_view(), name='download_obj_bucket'),
-    path('upload_obj/<str:key>',views.UploadObjectBucket.as_view(), name='upload_obj_bucket'),
+    path('upload_obj/',views.UploadObjectBucket.as_view(), name='upload_obj_bucket'),
 
 ]
 

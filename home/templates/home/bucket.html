@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <a href="{% url 'home:upload_obj_bucket' objects %}">upload</a>
+    <form action="{% url 'home:upload_obj_bucket' %}" method="get">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="send">
+    </form><br>
+
 
     <table class="table table-dark">
         <thead>

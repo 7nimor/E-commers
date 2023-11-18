@@ -34,9 +34,17 @@ class Bucket:
         with open(settings.AWS_LOCAL_STORAGE + key, 'wb') as f:
             self.conn.download_fileobj(settings.AWS_STORAGE_BUCKET_NAME, key, f)
 
-    def upload_object(self, key):
-        with open(key, 'rb') as data:
-            self.conn.upload_fileobj(data, settings.AWS_STORAGE_BUCKET_NAME, key)
+    def upload_object(self,key):
+        file_path = key
+        object_name = 'file.txt'
+
+        with open(file_path, "rb") as file:
+            self.conn.put_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                ACL='private',
+                Body=file,
+                Key=object_name
+            )
 
 
 bucket = Bucket()
