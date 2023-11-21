@@ -1,3 +1,7 @@
+import random
+import string
+ARVAN_USER_IMAGE_URL = 'https://user-image-gallery.s3.ir-thr-at1.arvanstorage.com/'
+
 import boto3
 from django.conf import settings
 
@@ -34,17 +38,19 @@ class Bucket:
         with open(settings.AWS_LOCAL_STORAGE + key, 'wb') as f:
             self.conn.download_fileobj(settings.AWS_STORAGE_BUCKET_NAME, key, f)
 
-    def upload_object(self,key):
-        file_path = key
-        object_name = 'file.txt'
-
-        with open(file_path, "rb") as file:
-            self.conn.put_object(
-                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-                ACL='private',
-                Body=file,
-                Key=object_name
+    def upload_object(self,req=None, field=None):
+        ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
+        if req.data[field] != "":
+            self.conn.upload_object(
+                image_data=req.data[field],
+                bucket_name="user-image-gallery",
+                object_name="{0}.jpg".format(str(ran))
             )
+            req.data.pop(field)
+            req.data[field] = ARVAN_USER_IMAGE_URL + "{0}.jpg".format(str(ran))
+        elif req.data[field] == "":
+            req.data[field] = "empty"
+        return req
 
 
 bucket = Bucket()

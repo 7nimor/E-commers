@@ -19,5 +19,5 @@ def download_bucket_object_task(key):
 
 
 @shared_task
-def upload_bucket_object_task(key):
-    bucket.upload_object(key)
+def upload_bucket_object_task(req=None, field=None):
+    bucket.upload_object(req, field)

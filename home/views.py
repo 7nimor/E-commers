@@ -41,8 +41,7 @@ class DownloadObjectBucket(View):
 
 
 class UploadObjectBucket(View):
-
     def get(self, request):
-        tasks.upload_bucket_object_task.delay(request.GET['upload_file'])
+        tasks.upload_bucket_object_task.delay(req=request.GET['upload_file'])
         messages.success(request, 'your file will be uploaded', 'info')
         return redirect('home:bucket')
