@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
+
+from utils import IsAdminMixin
 from .models import Product
 from . import tasks
 from . import forms
@@ -19,21 +21,21 @@ class ProductsDetailView(View):
         return render(request, 'home/details.html', {'product': product})
 
 
-class BucketView(View):
+class BucketView(IsAdminMixin,View):
     def get(self, request):
         form = forms.UploadObjBucket()
         objects = tasks.all_bucket_object_task()
         return render(request, 'home/bucket.html', {'objects': objects,'form':form})
 
 
-class DeleteObjectBucket(View):
+class DeleteObjectBucket(IsAdminMixin,View):
     def get(self, request, key):
         tasks.delete_bucket_object_task.delay(key)
         messages.success(request, 'your image will be delete', 'info')
         return redirect('home:bucket')
 
 
-class DownloadObjectBucket(View):
+class DownloadObjectBucket(IsAdminMixin,View):
     def get(self, request, key):
         tasks.download_bucket_object_task.delay(key)
         messages.success(request, 'your file will be downloaded', 'info')
