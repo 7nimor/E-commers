@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'storages',
     'celery',
+    'django_celery_beat',
 
 ]
 
