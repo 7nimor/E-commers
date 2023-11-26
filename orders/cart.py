@@ -1,7 +1,7 @@
 CART_SESSION_KEY = 'cart'
 
 
-class CartItem:
+class Cart:
     def __init__(self, request):
         self.session = request.session
         cart = self.session.get(CART_SESSION_KEY)
