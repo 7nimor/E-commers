@@ -1,12 +1,11 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
-
 from utils import IsAdminMixin
 from .models import Product, Category
 from . import tasks
 from . import forms
-
+from orders.forms import CartAddForm
 
 # Create your views here.
 class HomeView(View):
@@ -22,7 +21,8 @@ class HomeView(View):
 class ProductsDetailView(View):
     def get(self, request, slug):
         product = get_object_or_404(Product, slug=slug)
-        return render(request, 'home/details.html', {'product': product})
+        form=CartAddForm()
+        return render(request, 'home/details.html', {'product': product,'form':form})
 
 
 class BucketView(IsAdminMixin, View):
