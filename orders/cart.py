@@ -8,7 +8,7 @@ class Cart:
         self.session = request.session
         cart = self.session.get(CART_SESSION_KEY)
         if not cart:
-            cart = request.session[CART_SESSION_KEY] = {}
+            cart = self.session[CART_SESSION_KEY] = {}
         self.cart = cart
 
     def __iter__(self):
@@ -17,6 +17,7 @@ class Cart:
         cart = self.cart.copy()
         for product in products:
             cart[str(product.id)]['product'] = product
+
         for item in cart.values():
             item['total_price'] = int(item['price']) * item['quantity']
             yield item
@@ -35,7 +36,7 @@ class Cart:
             self.save()
 
     def save(self):
-        self.session.modify = True
+        self.session.modified = True
 
     def get_total_price(self):
         return sum(int(item['price']) * item['quantity'] for item in self.cart.values())
