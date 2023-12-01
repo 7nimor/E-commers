@@ -17,25 +17,30 @@
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% url 'home:bucket' %}">bucket</a>
             </li>
-            {% endif %}
+        {% endif %}
 
         {% if request.user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% url 'accounts:user_logout' %}">logout</a>
             </li>
-               <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Profile</a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Profile</a>
+            </li>
         {% else %}
-              <li class="nav justify-content-end">
-            <a class="nav-link active" aria-current="page"
-               href="{% url 'accounts:user_login' %}">login</a>
-        </li>
+            <li class="nav justify-content-end">
+                <a class="nav-link active" aria-current="page"
+                   href="{% url 'accounts:user_login' %}">login</a>
+            </li>
+            <li class="nav justify-content-end">
+                <a class="nav-link" aria-current="page"
+                   href="{% url 'accounts:user_register' %}">Register</a>
+            </li>
+        {% endif %}
         <li class="nav justify-content-end">
             <a class="nav-link" aria-current="page"
-               href="{% url 'accounts:user_register' %}">Register</a>
+               href="{% url 'orders:cart' %}" style="color:brown;">CART {{ cart|length  }}</a>
+
         </li>
-        {% endif %}
 
     </ul>
 
