@@ -1,12 +1,17 @@
+import datetime
+
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from home.models import Product
 from .cart import Cart
-from .forms import CartAddForm
-from .models import Order, OrderItem
+from .forms import CartAddForm, CouponAddForm
+from .models import Order, OrderItem, Coupon
 from django.conf import settings
 import requests
 import json
+
 
 # Create your views here.
 class CartView(View):
@@ -34,22 +39,22 @@ class CartRemoveView(View):
 
 
 class OrderDetailView(View):
+    form_class = CouponAddForm
+
     def get(self, request, order_id):
         order = get_object_or_404(Order, id=order_id)
-        return render(request, 'orders/detail.html', {'order': order})
+        return render(request, 'orders/detail.html', {'order': order, 'form': self.form_class})
 
 
 class OrderCreateView(View):
     def get(self, request):
         cart = Cart(request)
-        order=Order.objects.create(user=request.user)
+        order = Order.objects.create(user=request.user)
         for item in cart:
-            OrderItem.objects.create(order=order, product=item['product'], quantity=item['quantity'],price=item['price'])
+            OrderItem.objects.create(order=order, product=item['product'], quantity=item['quantity'],
+                                     price=item['price'])
         cart.clean()
-        return redirect('orders:order_detail',order.id)
-
-
-
+        return redirect('orders:order_detail', order.id)
 
 
 if settings.SANDBOX:
@@ -63,11 +68,13 @@ ZP_API_STARTPAY = f"https://{sandbox}.zarinpal.com/pg/StartPay/"
 description = "توضیحات مربوط به تراکنش را در این قسمت وارد کنید"  # Required
 # Important: need to edit for realy server.
 CallbackURL = 'http://127.0.0.1:8080/orders/verify/'
+
+
 class OrderPayView(View):
     def get(self, request, order_id):
-        order=Order.objects.get(id=order_id)
-        request.session['order_pay'] ={
-            'order_id':order.id
+        order = Order.objects.get(id=order_id)
+        request.session['order_pay'] = {
+            'order_id': order.id
         }
         data = {
             "MerchantID": settings.MERCHANT,
@@ -99,9 +106,9 @@ class OrderPayView(View):
 
 class OrderVerifyView(View):
     def get(self, request):
-        authority=request.GET['Authority']
-        order_id=request.session['order_pay']['order_id']
-        order=Order.objects.get(id=order_id)
+        authority = request.GET['Authority']
+        order_id = request.session['order_pay']['order_id']
+        order = Order.objects.get(id=order_id)
         data = {
             "MerchantID": settings.MERCHANT,
             "Amount": order.get_total_price(),
@@ -119,3 +126,22 @@ class OrderVerifyView(View):
             else:
                 return {'status': False, 'code': str(response['Status'])}
         return response
+
+
+class CouponApplyView(LoginRequiredMixin, View):
+    form_class = CouponAddForm
+
+    def post(self, request, order_id):
+        now = datetime.datetime.now()
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code']
+            try:
+                coupon = Coupon.objects.get(code__exact=code, valid_from__lte=now, valid_to__gte=now, active=True)
+            except Coupon.DoesNotExist:
+                messages.error(request, "Coupon dosen't exist", 'danger')
+                return redirect('orders:order_detail', order_id)
+            order = Order.objects.get(id=order_id)
+            order.discount = coupon.discount
+            order.save()
+        return redirect('orders:order_detail', order_id)
